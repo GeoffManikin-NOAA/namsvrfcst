@@ -1,0 +1,109 @@
+#!/bin/sh
+echo 'into'
+
+cyc=$1
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch7/parc
+cd /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch7/parc
+
+year=`cut -c 7-10 /lfs/h1/ops/prod/com/date/t${cyc}z`
+month=`cut -c 11-12 /lfs/h1/ops/prod/com/date/t${cyc}z`
+date=`cut -c 13-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+da00=`cut -c 7-16 /lfs/h1/ops/prod/com/date/t${cyc}z`
+yyyymmdd=`cut -c 7-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+
+date
+date > holddate 
+echo $holddate
+dayoweek=`cut -c 1-3 holddate`
+echo $dayoweek
+
+#year=2002
+#month=11
+#date=10
+#yyyymmdd=20021110
+#dayoweek=Sun
+
+/nwprod/util/ush/startxvfb.sh /bin/sh
+. ./STARTXVFB
+
+times="45 48 51 54 57 60 63 66 69 72 75 78 81 84"
+for fhr in $times; do
+
+# negate the colors ahead of time except white and black
+gpcolor << EOFC
+COLORS=0=255:255:255?
+COLORS=101=255:255:255;1=0:0:0
+DEVICE   = GF
+r
+
+ex
+EOFC
+
+#fmdl=/com/nawips/prod/nam.${yyyymmdd}/nam_${yyyymmdd}${cyc}f0${fhr}
+fmdl=/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/nam218_${yyyymmdd}${cyc}
+
+    gdplot2 << EOF
+
+ GDFILE   = $fmdl
+ GDATTIM  = f$fhr 
+ GLEVEL   = 255:0 
+ GVCORD   = pdly 
+ GDPFUN   = plpl
+ CINT     = 300;400;500;600;700;750;800;850;900;950 
+ LINE     = 0
+ MAP      = 1
+ WIND     = 0
+ TITLE    = 1/-1/~    PRESS of LIFTED PARCEL LEVEL 
+ DEVICE   = GF|parc${fhr}.gif|700;900
+ SATFIL   =
+ RADFIL   =
+ PROJ     = lcc/60;-100;30;/1;2;1;1 
+ GAREA    = 18.;-120.;50.;-58.
+ CLEAR    = y
+ PANEL    = 0
+ TEXT     = 1.1/11/2/SW
+ SCALE    = 0
+ LATLON   = 0
+ HILO     = 0
+ HLSYM    = 0
+ CLRBAR   = 1/H/UL/.05;0.92/.8;.02/1
+ CONTUR   = 0
+ SKIP     = 0
+ FLINE    = 0;30;28;25;4;23;21;20;17;2;15
+ FINT     = 300;400;500;600;700;750;800;850;900;950 
+ TYPE     = f
+ LUTFIL   =
+ STNPLT   =
+r
+
+ex
+EOF
+
+gpend
+done
+/nwprod/util/ush/stopxvfb.sh /bin/sh
+
+. /u/geoffrey.manikin/.Utils
+export w1=wd20mg
+export w2=$rzdm
+
+ftp -n -v << EOF > /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/parcftp.out
+open emcrzdm
+user $w1 $w2
+binary
+cd /home/people/emc/www/htdocs/mmb/namsvrfcst/images/today
+mput *.gif
+bye
+EOF
+
+ftp -n -v << EOF > /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/parcftp.out2
+open emcrzdm
+user $w1 $w2
+binary
+cd /home/people/emc/www/htdocs/mmb/namsvrfcst/images/${dayoweek}/${cyc}z
+mput *gif
+bye
+EOF
+
+mv *gif /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/hold/.
+exit

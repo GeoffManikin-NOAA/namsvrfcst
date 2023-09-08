@@ -1,0 +1,21 @@
+#!/bin/sh
+echo 'into'
+
+cyc=$1
+namver=$2
+
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch3
+cd /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch3
+
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_lapse ${cyc} ${namver} &
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_gust ${cyc} ${namver} &
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_helic ${cyc} ${namver} &
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_24pcp ${cyc} ${namver} &
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_cloud ${cyc} ${namver} &
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_cape ${cyc} ${namver}
+wait
+
+echo beforestopxvfb3
+exit
+
+

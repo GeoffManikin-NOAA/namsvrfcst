@@ -1,0 +1,104 @@
+#!/bin/sh
+echo 'into'
+
+cyc=$1
+version=$2
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch1/700
+cd /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch1/700
+cp /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/coltbl.xwp .
+
+year=`cut -c 7-10 /lfs/h1/ops/prod/com/date/t${cyc}z`
+month=`cut -c 11-12 /lfs/h1/ops/prod/com/date/t${cyc}z`
+date=`cut -c 13-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+yyyymmdd=`cut -c 7-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+
+date
+date > holddate 
+echo $holddate
+dayoweek=`cut -c 1-3 holddate`
+echo $dayoweek
+
+#year=2002
+#month=11
+#date=10
+#yyyymmdd=20021110
+#dayoweek=Sun
+
+times="03 06 09 12 15 18 21 24 27 30 33 36 39"
+times="00 03 06 09 12 15"
+for fhr in $times; do
+
+fmdl=/lfs/h1/ops/prod/com/nam/${version}/nam.${yyyymmdd}/gempak/nam40_${yyyymmdd}${cyc}f0${fhr}
+
+    gdplot2 << EOF
+ GDFILE   = $fmdl
+ GDATTIM  = f$fhr 
+ GLEVEL   = 700 
+ GVCORD   = pres 
+ GDPFUN   = relh 
+ CINT     = 50;60;70;80;90 
+ LINE     = 0 
+ MAP      = 1
+ WIND     = 0
+ TITLE    = 1/-1/~ 700 MB RH/OMEG (rising motion contoured in red)
+ DEVICE   = GIF|700${fhr}.gif|700;850
+ SATFIL   =
+ RADFIL   =
+ PROJ     = lcc/60;-100;30;/1;2;1;1
+ GAREA    = 18;-121;50;-57
+ CLEAR    = y
+ PANEL    = 0
+ TEXT     = 1.1/11/2/SW
+ SCALE    = 0
+ LATLON   = 0
+ HILO     = 0
+ HLSYM    = 0
+ CLRBAR   = 1/H/UL/.15;0.92/.5;.02/2 
+ CONTUR   = 0
+ SKIP     = 0
+ FINT     = 50;60;70;80;90
+ FLINE    = 0;20;5;21;22;23
+ TYPE     = f/c
+ LUTFIL   =
+ STNPLT   =
+r
+
+ CLEAR    = n
+ GDPFUN   = mul(omeg,1000)
+ CINT     = 1/-50/-1
+ LINE     = 2/1/2/0
+ FINT     = 0
+ FLINE    = 0
+ CLRBAR   = 0
+ TYPE     = c
+r
+
+ex
+EOF
+
+gpend
+done
+
+. /u/geoffrey.manikin/.Utils
+export w1=wd20mg
+export w2=$rzdm
+
+ftp -n -v << EOF > /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/700ftp.out
+open emcrzdm
+user $w1 $w2
+binary
+cd /home/people/emc/www/htdocs/mmb/namsvrfcst/images/today
+mput *.gif
+bye
+EOF
+
+ftp -n -v << EOF > /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/700ftp.out
+open emcrzdm
+user $w1 $w2
+binary
+cd /home/people/emc/www/htdocs/mmb/namsvrfcst/images/${dayoweek}/${cyc}z
+mput *gif
+bye
+EOF
+
+exit

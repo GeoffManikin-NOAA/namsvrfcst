@@ -1,0 +1,21 @@
+#!/bin/ksh
+
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/change
+rm /lfs/h2/emc/stmp/geoffrey.manikin/change/*
+cd /lfs/h2/emc/stmp/geoffrey.manikin/change
+cp /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make* .
+
+echo 'into'
+
+for f in *; do
+vi $f << EOF > /dev/null
+:1,\$ s/version/version
+
+:wq
+EOF
+
+echo $f
+sleep 1
+done
+#mv * /lfs/h2/vpppg/save/geoffrey.manikin/namsvrfcst/.
+exit

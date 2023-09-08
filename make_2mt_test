@@ -1,0 +1,84 @@
+#!/bin/sh
+echo 'into'
+
+cyc=$1
+version=$2
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch8/2mt
+rm /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch8/2mt/*
+cd /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch8/2mt
+cp /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/coltbl.xwp .
+
+year=`cut -c 7-10 /lfs/h1/ops/prod/com/date/t${cyc}z`
+month=`cut -c 11-12 /lfs/h1/ops/prod/com/date/t${cyc}z`
+date=`cut -c 13-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+yyyymmdd=`cut -c 7-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+
+date
+date > holddate 
+echo $holddate
+dayoweek=`cut -c 1-3 holddate`
+echo $dayoweek
+
+#year=2002
+#month=11
+#date=10
+#yyyymmdd=20021110
+#dayoweek=Sun
+
+times="00 03 06 09 12 15 18 21 24 27 30 33 36 39 42"
+times="00 03 06 09 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84"
+#times="51 54 57 60 63 66 69 72 75 78 81 84"
+
+for fhr in $times; do
+
+fmdl=/lfs/h1/ops/prod/com/nam/${version}/nam.${yyyymmdd}/gempak/nam20_${yyyymmdd}${cyc}f0${fhr}
+
+    gdplot2 << EOF
+ GDFILE   = $fmdl
+ GDATTIM  = f$fhr 
+ GLEVEL   = 2 
+ GVCORD   = hght 
+ GDPFUN   = tmpf 
+ CINT     = 5 
+ LINE     = 0 
+ MAP      = 1
+ WIND     = 0
+ TITLE    = 1/-1/~  2M TEMPERATURE (FREEZING LINE IN BLACK) 
+ DEVICE   = GIF|2mt${fhr}.gif|850;950
+ SATFIL   =
+ RADFIL   =
+ PROJ     = lcc/60;-100;30;/1;1;1;1
+ GAREA    = 19;-120;47;-64
+ CLEAR    = y
+ PANEL    = 0
+ TEXT     = 1.1/11/2/SW
+ SCALE    = 0 
+ LATLON   = 0
+ HILO     = 0 
+ HLSYM    = 0 
+ CLRBAR   = 1/H/UL/.1;0.92/.6;.02/2
+ CONTUR   = 0
+ SKIP     = 0
+ FINT     = 0;5;10;15;20;25;30;35;40;45;50;55;60;65;70;75;80;85;90;95;100
+# FINT     = -36;-30;-24;-18;-12;-6;0;6;12;18;24;30;36;42;48;54;60;66;72;78
+ FLINE    = 0;12;30;29;28;4;25;26;27;24;23;22;21;5;20;10;17;16;2;15;32
+ TYPE     = f
+ LUTFIL   =
+ STNPLT   =
+r
+
+ CINT     = 1/32/32
+ TYPE     = c
+ CLEAR    = n
+ LINE     = 1/1/4/0
+r
+
+ex
+EOF
+
+gpend
+done
+EOF
+scp *gif wd20mg@emcrzdm:/home/people/emc/www/htdocs/mmb/namsvrfcst/images/today
+scp *gif wd20mg@emcrzdm:/home/people/emc/www/htdocs/mmb/namsvrfcst/images/${dayoweek}/${cyc}z
+exit

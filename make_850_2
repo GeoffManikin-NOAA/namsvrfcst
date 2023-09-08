@@ -1,0 +1,112 @@
+#!/bin/sh
+echo 'into'
+
+cyc=$1
+version=$2
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch7/850
+cd /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch7/850
+cp /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/coltbl.xwp .
+
+year=`cut -c 7-10 /lfs/h1/ops/prod/com/date/t${cyc}z`
+month=`cut -c 11-12 /lfs/h1/ops/prod/com/date/t${cyc}z`
+date=`cut -c 13-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+yyyymmdd=`cut -c 7-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+
+date
+date > holddate 
+echo $holddate
+dayoweek=`cut -c 1-3 holddate`
+echo $dayoweek
+
+#year=2002
+#month=11
+#date=10
+#yyyymmdd=20021110
+#dayoweek=Sun
+
+times="45 48 51 54 57 60 63 66 69 72 75 78 81 84"
+for fhr in $times; do
+
+fmdl=/lfs/h1/ops/prod/com/nam/${version}/nam.${yyyymmdd}/gempak/nam40_${yyyymmdd}${cyc}f0${fhr}
+
+    gdplot2 << EOF
+ GDFILE   = $fmdl
+ GDATTIM  = f$fhr 
+ GLEVEL   = 850 
+ GVCORD   = pres 
+ GDPFUN   = adv(tmpc,wnd) 
+ CINT     = 2/1/50 
+ LINE     = 7/10/5/0 
+ MAP      = 1
+ WIND     = BK1/0.8/2/122 
+ TITLE    = 1/-1/~ 850 MB TMP, WARM ADV (dotted), WINDS (knots, red=50+)
+ DEVICE   = GIF|850${fhr}.gif|700;850
+ SATFIL   =
+ RADFIL   =
+ PROJ     = lcc/60;-100;30;/1;2;1;1
+ GAREA    = 18.;-123.;54.;-57.
+ CLEAR    = y
+ PANEL    = 0
+ TEXT     = 1.1/11/2/SW
+ SCALE    = 
+ LATLON   = 0
+ HILO     = 0 
+ HLSYM    = 0 
+ CLRBAR   = 1/H/UL/.05;0.97/.5;.02/2 
+ CONTUR   = 0
+ SKIP     = 0
+ FINT     = 0 
+ FLINE    = 0;30;28;27;25;23;21;5;10;17;11;2;15
+ TYPE     = c
+ LUTFIL   =
+ STNPLT   =
+r
+
+ GDPFUN   = tmpc
+ TEXT     = 1.2/11/2/SW
+ TITLE    = 0
+ CLEAR    = n
+ CINT     = 1/0/0
+ LINE     = 4/1/4/1
+r
+
+ GDPFUN   = tmpc
+ CINT     = 3/-42/-3
+ LINE     = 4/1/2/3
+r
+
+ GDPFUN   = tmpc
+ CINT     = 3/3/42
+ LINE     = 17/1/2/3
+r
+
+ GDPFUN   = tmpc
+ CINT     = 1/15/15
+ LINE     = 17/1/4/1
+r
+
+ GDPFUN   = knts(sped)
+ CINT     = 47.9;100
+ LINE     = 0
+ FINT     = 47.9;100 
+ FLINE    = 0;2;15
+ TYPE     = f 
+ CLRBAR   = 0
+r
+
+ CINT     = 
+ GDPFUN   = kntv(wnd)
+ SKIP     = /7;7
+ TYPE     = b
+ TITLE    = 0
+ CLRBAR   = 0 
+ CLEAR    = n
+r
+
+ex
+EOF
+
+gpend
+done
+mv *gif /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/hold/.
+exit

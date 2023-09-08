@@ -1,0 +1,71 @@
+#!/bin/sh
+echo 'into'
+
+cyc=$1
+version=$2
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch2/1dew
+cd /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch2/1dew
+cp /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/coltbl.xwp .
+
+year=`cut -c 7-10 /lfs/h1/ops/prod/com/date/t${cyc}z`
+month=`cut -c 11-12 /lfs/h1/ops/prod/com/date/t${cyc}z`
+date=`cut -c 13-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+yyyymmdd=`cut -c 7-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+
+date
+date > holddate 
+echo $holddate
+dayoweek=`cut -c 1-3 holddate`
+echo $dayoweek
+
+#year=2002
+#month=11
+#date=10
+#yyyymmdd=20021110
+#dayoweek=Sun
+
+times="45 48 51 54 57 60 63 66 69 72 75 78 81 84"
+for fhr in $times; do
+
+fmdl=/lfs/h1/ops/prod/com/nam/${version}/nam.${yyyymmdd}/gempak/nam40_${yyyymmdd}${cyc}f0${fhr}
+
+    gdplot2 << EOF
+ GDFILE   = $fmdl
+ GDATTIM  = f$fhr 
+ GLEVEL   = 1 
+ GVCORD   = hybl 
+ GDPFUN   = dwpf 
+ CINT     = 4 
+ LINE     = 0 
+ MAP      = 1
+ WIND     = 0
+ TITLE    = 1/-1/~  DEW POINT ON 1ST MODEL LEVEL ABOVE GROUND 
+ DEVICE   = GIF|1dew${fhr}.gif|600:950
+ SATFIL   =
+ RADFIL   =
+ PROJ     = lcc/60;-100;30;/1;1;1;1
+ GAREA    = 20;-120;48;-64
+ CLEAR    = y
+ PANEL    = 0
+ TEXT     = 1.1/11/2/SW
+ SCALE    = 0 
+ LATLON   = 0
+ HILO     = 0 
+ HLSYM    = 0 
+ CLRBAR   = 1/H/UL/.05;0.97/.5;.02/2 
+ CONTUR   = 0
+ SKIP     = 0
+ FINT     = 2;6;10;14;18;22;26;30;34;38;42;46;50;54;58;62;66;70 
+ FLINE    = 11;10;9;17;5;20;25;26;27;0;21;22;23;28;29;30;2;15;32
+ TYPE     = f
+ LUTFIL   =
+ STNPLT   =
+r
+
+ex
+EOF
+
+gpend
+done
+mv *gif /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/hold/.
+exit

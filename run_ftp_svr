@@ -1,0 +1,24 @@
+#!/bin/ksh
+#
+#PBS -N svr.ftp
+#PBS -o /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/svrftp.out
+#PBS -e /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/svrftp.out
+#PBS -l walltime=00:10:00
+#PBS -A NAM-DEV
+#PBS -q dev_transfer
+
+set -x
+
+cd /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/hold
+
+date
+date > holddate
+echo $holddate
+dayoweek=`cut -c 1-3 holddate`
+cyc=`cat /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/NCEPDATE | cut -c15-16`
+echo $cyc
+
+scp *gif wd20mg@emcrzdm:/home/people/emc/www/htdocs/mmb/namsvrfcst/images/today
+scp *gif wd20mg@emcrzdm:/home/people/emc/www/htdocs/mmb/namsvrfcst/images/${dayoweek}/${cyc}z
+scp *html wd20mg@emcrzdm:/home/people/emc/www/htdocs/mmb/namsvrfcst/
+exit

@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+#PBS -N namsvr00 
+#PBS -o /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/nmsvr00.out
+#PBS -e /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/namsvr00.err
+#PBS -l select=1:ncpus=32:mpiprocs=4:mem=200GB
+#PBS -q dev
+#PBS -l walltime=01:30:00
+#PBS -A VERF-DEV
+
+cd $PBS_O_WORKDIR
+
+source /lfs/h2/emc/vpppg/save/geoffrey.manikin/versions/run.ver
+echo $envvar_ver
+module load envvar/${envvar_ver}
+module load PrgEnv-intel/${PrgEnv_intel_ver}
+module load intel/${intel_ver}
+module load craype/${craype_ver}
+module load cray-mpich/${craympich_ver}
+module load cfp/${cfp_ver}
+module load wgrib2/${wgrib2_ver}
+module load gempak/${gempak_ver}
+module load cray-pals
+echo 'here'
+
+#
+set -x
+
+HOLDIN=/lfs/h2/emc/stmp/geoffrey.manikin
+mkdir $HOLDIN/namsvr
+mkdir $HOLDIN/hold
+cd $HOLDIN/namsvr
+rm poescript
+namver=v4.2
+
+cyc=`cat /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/NCEPDATE | cut -c15-16`
+
+echo "/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/launch1 ${cyc} ${namver}" >> poescript
+echo "/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/launch2 ${cyc} ${namver}" >> poescript
+echo "/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/launch3 ${cyc} ${namver}" >> poescript
+echo "/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/launch4 ${cyc} ${namver}" >> poescript
+echo "/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/launch5 ${cyc} ${namver}" >> poescript
+echo "/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/launch6 ${cyc} ${namver}" >> poescript
+echo "/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/launch7 ${cyc} ${namver}" >> poescript
+echo "/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/launch8 ${cyc} ${namver}" >> poescript
+
+chmod 775 poescript
+export MP_PGMMODEL=mpmd
+export MP_CMDFILE=poescript
+#
+# Execute the script.
+
+echo beforelsf
+mpirun -l cfp poescript
+echo pastlsf
+
+qsub < /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/run_ftp_svr
+rm /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/nam218*
+exit

@@ -1,0 +1,52 @@
+#!/bin/bash
+#PBS -N nagrib218.out 
+#PBS -o /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/cloud06.out
+#PBS -e /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/cloud06.err
+#PBS -l select=1:ncpus=1:mpiprocs=1:mem=20GB
+#PBS -q dev
+#PBS -l walltime=00:30:00
+#PBS -A VERF-DEV
+
+cd $PBS_O_WORKDIR
+namver=v4.2
+
+export cyc=$1
+export PS4='PRDGEN${fhr}_T$SECONDS + '
+export XLFRTEOPTS="unit_vars=yes"
+
+echo $cyc
+ymdh=`cut -c 7-16 /lfs/h1/ops/prod/com/date/t${cyc}z`
+ymd=`cut -c 7-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+md=`cut -c 9-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+echo $ymdh
+
+rm /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/nam218*
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/nagrib218
+cd /lfs/h2/emc/stmp/geoffrey.manikin/nagrib218
+cp /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/*tbl .
+
+hours="00 03 06 09 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84"
+for fhr in $hours; do
+
+ nagrib << EOF
+  GBFILE   = /lfs/h1/ops/prod/com/nam/${namver}/nam.${ymd}/nam.t${cyc}z.awip12${fhr}.tm00
+  INDXFL   =
+  GDOUTF   = nam218_${ymdh}
+  PROJ     = MER
+  GRDAREA  =
+  KXKY     = 10;10
+  MAXGRD   = 6000
+  CPYFIL   = gds
+  GAREA    = grid
+  OUTPUT   = T
+  GBTBLS   =
+  GBDIAG   =
+r
+
+exit
+EOF
+done
+
+gpend
+mv nam218* /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/.
+exit

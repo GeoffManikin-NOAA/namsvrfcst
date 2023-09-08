@@ -1,0 +1,80 @@
+#!/bin/sh
+echo 'into'
+
+cyc=$1
+version=$2
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch5/250
+cd /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch5/250
+cp /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/coltbl.xwp .
+
+year=`cut -c 7-10 /lfs/h1/ops/prod/com/date/t${cyc}z`
+month=`cut -c 11-12 /lfs/h1/ops/prod/com/date/t${cyc}z`
+date=`cut -c 13-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+yyyymmdd=`cut -c 7-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+
+date
+date > holddate 
+echo $holddate
+dayoweek=`cut -c 1-3 holddate`
+echo $dayoweek
+
+#year=2002
+#month=11
+#date=10
+#yyyymmdd=20021110
+#dayoweek=Sun
+
+times="45 48 51 54 57 60 63 66 69 72 75 78 81 84"
+for fhr in $times; do
+
+fmdl=/lfs/h1/ops/prod/com/nam/${version}/nam.${yyyymmdd}/gempak/nam40_${yyyymmdd}${cyc}f0${fhr}
+
+    gdplot2 << EOF
+ GDFILE   = $fmdl
+ GDATTIM  = f$fhr 
+ GLEVEL   = 250 
+ GVCORD   = pres 
+ GDPFUN   = knts(sped) 
+ CINT     = 10 
+ LINE     = 0 
+ MAP      = 1
+ WIND     = BK1/0.7/2/122 
+ TITLE    = 1/-1/~ 250 MB WINDS (knots)
+ DEVICE   = GIF|250${fhr}.gif|800;900
+ SATFIL   =
+ RADFIL   =
+ PROJ     = lcc/60;-100;30;/1;2;1;1
+ GAREA    = 16;-127;56;-53
+ CLEAR    = y
+ PANEL    = 0
+ TEXT     = 1.1/11/2/SW
+ SCALE    = 0 
+ LATLON   = 0
+ HILO     = 0 
+ HLSYM    = 0 
+ CLRBAR   = 1/H/UL/.05;0.92/.5;.02/2 
+ CONTUR   = 0
+ SKIP     = /9;9
+ FINT     = 50;60;70;80;90;100;110;120;130;140;150;160
+ FLINE    = 0;30;28;27;25;23;21;5;10;17;11;2;15
+ TYPE     = f/c
+ LUTFIL   =
+ STNPLT   =
+r
+
+ GDPFUN   = kntv(wnd)
+ TYPE     = b
+ TITLE    = 0
+ CLRBAR   = 0 
+ CLEAR    = n
+r
+
+ex
+EOF
+
+gpend
+done
+echo paststop
+
+mv *gif /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/hold/.
+exit

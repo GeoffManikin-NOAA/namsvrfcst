@@ -1,0 +1,20 @@
+#!/bin/sh
+echo 'into'
+
+cyc=$1
+namver=$2
+
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch2
+cd /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch2
+
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_dwpf ${cyc} ${namver} &
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_stmmot ${cyc} ${namver} &
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_type ${cyc} ${namver} &
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_1dew_2 ${cyc} ${namver} &
+/lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/make_3pcp ${cyc} ${namver} 
+wait
+
+echo beforestopxvfb2
+exit
+
+

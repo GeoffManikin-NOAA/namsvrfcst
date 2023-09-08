@@ -1,0 +1,99 @@
+#!/bin/sh
+echo 'into'
+
+cyc=$1
+version=$2
+mkdir /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch2/dwpf
+cd /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/launch2/dwpf
+cp /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/coltbl.xwp .
+
+year=`cut -c 7-10 /lfs/h1/ops/prod/com/date/t${cyc}z`
+month=`cut -c 11-12 /lfs/h1/ops/prod/com/date/t${cyc}z`
+date=`cut -c 13-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+yyyymmdd=`cut -c 7-14 /lfs/h1/ops/prod/com/date/t${cyc}z`
+
+date
+date > holddate 
+echo $holddate
+dayoweek=`cut -c 1-3 holddate`
+echo $dayoweek
+
+#year=2002
+#month=11
+#date=10
+#yyyymmdd=20021110
+#dayoweek=Sun
+
+times="00 03 06 09 12 15 18 21 24 27 30 33 36 39 42"
+for fhr in $times; do
+
+fmdl=/lfs/h1/ops/prod/com/nam/${version}/nam.${yyyymmdd}/gempak/nam40_${yyyymmdd}${cyc}f0${fhr}
+
+    gdplot2 << EOF
+ GDFILE   = $fmdl
+ GDATTIM  = f$fhr 
+ GLEVEL   = 2 
+ GVCORD   = hght 
+ GDPFUN   = dwpf 
+ CINT     = 4 
+ LINE     = 0 
+ MAP      = 1
+ WIND     = 0
+ TITLE    = 1/-1/~ SEA LEVEL PRESSURE / 2M DEW POINT / 10M WIND
+ DEVICE   = GIF|dwpf${fhr}.gif|750;900
+ SATFIL   =
+ RADFIL   =
+ PROJ     = lcc/60;-100;30;/1;1;1;1
+ GAREA    = 15;-123;51;-59
+ CLEAR    = y
+ PANEL    = 0
+ TEXT     = 1.1/11/2/SW
+ SCALE    = 0 
+ LATLON   = 0
+ HILO     = 0 
+ HLSYM    = 0 
+ CLRBAR   = 1/H/UL/.05;0.95/.5;.02/2 
+ CONTUR   = 0
+ SKIP     = 0
+ FINT     = 50;54;58;62;66;70;74;78;82
+ FLINE    = 0;21;22;23;28;29;30;2;15;32
+ TYPE     = f/c
+ LUTFIL   =
+ STNPLT   =
+r
+
+ GLEVEL   = 10
+ GVCORD   = HGHT
+ WIND     = ak1/0.6/2/122/0.7
+ GDPFUN   = wnd
+ TYPE     = a
+ HILO     = 0
+ HLSYM    = 0
+ CLEAR    = n
+ CLRBAR   = 0
+ SCALE    = 0
+ FINT     = 0
+ FLINE    = 0
+ TEXT     = 0
+r
+
+ GDPFUN   = PMSL
+ GLEV     = 0
+ GVCORD   = none 
+ CINT     = 4 
+ LINE     = 4/1/2/3
+ TITLE    = 0
+ HILO     = 18;18/S12#;S13#/1015-1060;920-1014/5/5;5/yes
+ HLSYM    = 2;1/3/21;21/4;2/HW
+ TYPE     = c
+r
+
+ex
+EOF
+
+gpend
+done
+
+echo paststop
+mv *gif /lfs/h2/emc/stmp/geoffrey.manikin/namsvr/hold/.
+exit

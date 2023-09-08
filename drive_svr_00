@@ -1,0 +1,25 @@
+#!/bin/ksh
+
+source /u/geoffrey.manikin/.bashrc
+namver=v4.2
+
+cd /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst
+cp /lfs/h1/ops/prod/com/date/t00z /lfs/h2/emc/vpppg/save/geoffrey.manikin/namsvrfcst/NCEPDATE
+
+ymd=`cut -c 7-14 /lfs/h1/ops/prod/com/date/t00z`
+cyc=`cut -c 15-16 /lfs/h1/ops/prod/com/date/t00z`
+if [ ! -s /lfs/h1/ops/prod/com/nam/${namver}/nam.${ymd}/nam.t00z.awip1260.tm00 ]
+then
+  sleep 600 
+fi
+
+if [ ! -s /lfs/h1/ops/prod/com/nam/${namver}/nam.${ymd}/nam.t00z.awip1284.tm00 ]
+then
+  sleep 300
+fi
+
+./run_nagrib_218 00 
+qsub < run_svr_graphics
+#sleep 420
+#./make_2mt_test 00 
+exit
